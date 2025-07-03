@@ -41,6 +41,7 @@
       padding: 30px;
       border-radius: 15px;
       box-shadow: 0 0 15px rgba(0,0,0,0.5);
+      width: 350px;
     }
 
     input {
@@ -63,7 +64,7 @@
 
     .result {
       margin-top: 20px;
-      background: #422;
+      background: #222;
       padding: 15px;
       border-radius: 10px;
     }
@@ -74,15 +75,50 @@
 
   <div class="form-container">
     <h2>Fill Your Crypto Card</h2>
-    <input type="text" id="username" placeholder="Username" />
-    <input type="text" id="twitter" placeholder="Twitter Handle" />
-    <input type="text" id="telegram" placeholder="Telegram" />
-    <input type="email" id="email" placeholder="Email Address" />
-    <button onclick="showResult()">Generate</button>
+    <input type="text" id="username" placeholder="Username" required />
+    <input type="text" id="twitter" placeholder="Twitter Handle" required />
+    <input type="text" id="telegram" placeholder="Telegram" required />
+    <input type="email" id="email" placeholder="Email Address" required />
+    <button onclick="submitCard()">Submit</button>
 
     <div class="result" id="result" style="display:none;"></div>
   </div>
 
   <script>
-    function showResult() {
-      const username = document.getElementById("username
+    async function submitCard() {
+      const username = document.getElementById("username").value.trim();
+      const twitter = document.getElementById("twitter").value.trim();
+      const telegram = document.getElementById("telegram").value.trim();
+      const email = document.getElementById("email").value.trim();
+
+      if (!username || !twitter || !telegram || !email) {
+        alert("Please fill all fields.");
+        return;
+      }
+
+      const data = { username, twitter, telegram, email };
+
+      try {
+        const res = await fetch("https://script.google.com/macros/s/AKfycbxZUbWcU6iqKfrvmXGBGbdxQ6Nc1LdPCG1evItcwJrZLD2cGSG81eRxn8V_8gk92FWd/exec", {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
+        });
+
+        const result = await res.json();
+        document.getElementById("result").style.display = "block";
+        document.getElementById("result").innerHTML = `
+          ✅ ${result.success ? "Submitted to Google Sheet!" : "Submission failed."}<br><br>
+          👤 ${username}<br>
+          🐦 ${twitter}<br>
+          💬 ${telegram}<br>
+          📧 ${email}
+        `;
+      } catch (err) {
+        alert("❌ Submission failed. Check your internet or script URL.");
+        console.error(err);
+      }
+    }
+  </script>
+</body>
+</html>
