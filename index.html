@@ -41,7 +41,8 @@
       padding: 30px;
       border-radius: 15px;
       box-shadow: 0 0 15px rgba(0,0,0,0.5);
-      width: 350px;
+      width: 90%;
+      max-width: 400px;
     }
 
     input {
@@ -60,6 +61,8 @@
       color: #000;
       cursor: pointer;
       font-weight: bold;
+      width: 100%;
+      margin-top: 10px;
     }
 
     .result {
@@ -75,48 +78,47 @@
 
   <div class="form-container">
     <h2>Fill Your Crypto Card</h2>
-    <input type="text" id="username" placeholder="Username" required />
-    <input type="text" id="twitter" placeholder="Twitter Handle" required />
-    <input type="text" id="telegram" placeholder="Telegram" required />
-    <input type="email" id="email" placeholder="Email Address" required />
-    <button onclick="submitCard()">Submit</button>
+    <input type="text" id="username" placeholder="Username" />
+    <input type="text" id="twitter" placeholder="Twitter Handle" />
+    <input type="text" id="telegram" placeholder="Telegram" />
+    <input type="email" id="email" placeholder="Email Address" />
+    <button onclick="submitForm()">Submit</button>
 
     <div class="result" id="result" style="display:none;"></div>
   </div>
 
   <script>
-    async function submitCard() {
-      const username = document.getElementById("username").value.trim();
-      const twitter = document.getElementById("twitter").value.trim();
-      const telegram = document.getElementById("telegram").value.trim();
-      const email = document.getElementById("email").value.trim();
+    async function submitForm() {
+      const username = document.getElementById("username").value;
+      const twitter = document.getElementById("twitter").value;
+      const telegram = document.getElementById("telegram").value;
+      const email = document.getElementById("email").value;
+      const resultDiv = document.getElementById("result");
 
-      if (!username || !twitter || !telegram || !email) {
-        alert("Please fill all fields.");
+      if (!username || !email) {
+        alert("Username and Email are required!");
         return;
       }
 
-      const data = { username, twitter, telegram, email };
-
       try {
-        const res = await fetch("https://script.google.com/macros/s/AKfycbxZUbWcU6iqKfrvmXGBGbdxQ6Nc1LdPCG1evItcwJrZLD2cGSG81eRxn8V_8gk92FWd/exec", {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(data),
+        const response = await fetch("https://script.google.com/macros/s/AKfycbxZUbWcU6iqKfrvmXGBGbdxQ6Nc1LdPCG1evItcwJrZLD2cGSG81eRxn8V_8gk92FWd/exec", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username, twitter, telegram, email })
         });
 
-        const result = await res.json();
-        document.getElementById("result").style.display = "block";
-        document.getElementById("result").innerHTML = `
-          ✅ ${result.success ? "Submitted to Google Sheet!" : "Submission failed."}<br><br>
-          👤 ${username}<br>
-          🐦 ${twitter}<br>
-          💬 ${telegram}<br>
-          📧 ${email}
-        `;
-      } catch (err) {
-        alert("❌ Submission failed. Check your internet or script URL.");
-        console.error(err);
+        const data = await response.json();
+
+        if (data.success) {
+          resultDiv.innerHTML = "<b>✅ Your data has been saved successfully!</b>";
+          resultDiv.style.display = "block";
+        } else {
+          resultDiv.innerHTML = "<b>❌ Something went wrong. Try again.</b>";
+          resultDiv.style.display = "block";
+        }
+      } catch (error) {
+        resultDiv.innerHTML = "<b>❌ Submission failed. Try again later.</b>";
+        resultDiv.style.display = "block";
       }
     }
   </script>
